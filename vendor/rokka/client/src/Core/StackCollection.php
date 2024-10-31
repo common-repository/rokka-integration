@@ -1,0 +1,113 @@
+<?php
+
+namespace Rokka\Client\Core;
+
+/**
+ * Holds a list of stacks.
+ */
+class StackCollection implements \Countable, \Iterator
+{
+    /**
+     * @var Stack[]
+     */
+    private $stacks = [];
+
+    /**
+     * @var int
+     */
+    private $current = 0;
+
+    /**
+     * Constructor.
+     *
+     * @param array $stacks Array of stacks
+     */
+    public function __construct(array $stacks)
+    {
+        foreach ($stacks as $stack) {
+            if (!($stack instanceof Stack)) {
+                throw new \LogicException('You can only use Stack inside StackCollection');
+            }
+        }
+
+        $this->stacks = $stacks;
+    }
+
+    /**
+     * Return the number of stacks in this collection.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return \count($this->stacks);
+    }
+
+    /**
+     * Return the stacks.
+     *
+     * @return Stack[]
+     */
+    public function getStacks()
+    {
+        return $this->stacks;
+    }
+
+    /**
+     * Create a stack from the JSON data returned by the rokka.io API.
+     *
+     * @param string $data JSON data
+     *
+     * @return StackCollection
+     */
+    public static function createFromJsonResponse($data)
+    {
+        $data = json_decode($data, true);
+
+        $stacks = array_map(function ($stack) {
+            return Stack::createFromDecodedJsonResponse($stack);
+        }, $data['items']);
+
+        return new self($stacks);
+    }
+
+    /**
+     * @return Stack
+     */
+    public function current()
+    {
+        return $this->stacks[$this->current];
+    }
+
+    /**
+     * @return void
+     */
+    public function next()
+    {
+        ++$this->current;
+    }
+
+    /**
+     * @return int
+     */
+    public function key()
+    {
+        return $this->current;
+    }
+
+    /**
+     * @return bool
+     */
+    public function valid()
+    {
+        return $this->current < \count($this->stacks);
+    }
+
+    /**
+     * @return void
+     */
+    public function rewind()
+    {
+        $this->current = 0;
+    }
+}

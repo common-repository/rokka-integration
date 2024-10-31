@@ -1,0 +1,45 @@
+name: deploy documentation
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Prepate documentation with doctum
+        run: ./scripts/prepare_doctum_docs_on_github.sh
+
+      - name: build doctum docs
+        uses: sudo-bot/action-doctum@v5
+        env:
+          _DOCTUM_TEMPLATE_DIR: ./template/
+        with:
+          config-file: ./scripts/doctum-config.php
+          # parse, render or update
+          method: "update"
+          # (optional) defaults to '--output-format=github --no-ansi --no-progress -v'
+          cli-args: "--output-format=github --no-ansi --no-progress -v"
+
+      - name: Deploy
+        uses: reggionick/s3-deploy@v3
+        with:
+          folder: doctum-output/build/
+          bucket: rokka-io
+          bucket-region: eu-central-1
+          dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          invalidation: /client-php-api/
+          delete-removed: false

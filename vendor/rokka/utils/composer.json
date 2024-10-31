@@ -1,0 +1,27 @@
+{
+    "name": "rokka/utils",
+    "description": "Some utility methods for rokka to be shared among projects",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "rokka.io",
+            "email": "rokka@rokka.io"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Rokka\\Utils\\": "src/"
+        }
+    },
+    "require": {
+        "php": "~7.0|~8.0",
+        "ext-json": "*",
+        "guzzlehttp/psr7": "^1.7|^2.1"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    }
+}
